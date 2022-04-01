@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Post;
 use App\Models\Category;
+use App\Models\Tag;
 
 class PostController extends Controller
 {
@@ -29,9 +30,10 @@ class PostController extends Controller
      */
     public function create()
     {
+        $tags = Tag::orderBy('label', 'ASC')->get();
         $categories = Category::all();
         $post = new Post;
-        return view('admin.posts.create', compact('post', 'categories'));
+        return view('admin.posts.create', compact('tags', 'post', 'categories'));
     }
 
     /**
@@ -46,7 +48,14 @@ class PostController extends Controller
 
         $post = new Post();
         $post->fill($data);
+
         $post->save();
+        // VA MESSO DOPO IL SAVE
+        if (array_key_exists('tags', $data)) {
+            $post->tags()->attach($data['tags']);
+        }
+
+
         return redirect()->route('admin.posts.index');
     }
 
@@ -58,7 +67,9 @@ class PostController extends Controller
      */
     public function show(Post $post)
     {
-        return view('admin.posts.show', compact('post'));
+        $tags = Tag::all();
+        $categories = Category::all();
+        return view('admin.posts.show', compact('post', 'tags', 'categories'));
     }
 
     /**
@@ -69,8 +80,9 @@ class PostController extends Controller
      */
     public function edit(Post $post)
     {
+        $tags = Tag::all();
         $categories = Category::all();
-        return view('admin.posts.edit', compact('post', 'categories'));
+        return view('admin.posts.edit', compact('tags', 'post', 'categories'));
     }
 
     /**
