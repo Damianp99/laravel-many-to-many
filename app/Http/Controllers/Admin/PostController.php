@@ -2,11 +2,18 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Models\Post;
-use App\Models\Category;
 use App\Models\Tag;
+use App\Models\Post;
+use App\Mail\SendEmail;
+use App\Models\Category;
+
+use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 
 class PostController extends Controller
 {
@@ -44,9 +51,17 @@ class PostController extends Controller
      */
     public function store(Request $request)
     {
-        $data = $request->all();
 
+
+
+        $data = $request->all();
         $post = new Post();
+
+        if (array_key_exists('image', $data)) {
+            $img_url = Storage::put('post_images', $data['image']);
+
+            $data['image'] = $img_url;
+        }
         $post->fill($data);
 
         $post->save();
@@ -54,6 +69,10 @@ class PostController extends Controller
         if (array_key_exists('tags', $data)) {
             $post->tags()->attach($data['tags']);
         }
+        // EMAIL MANDATA DOPO IL SAVE
+        $mail = new SendEmail();
+        $receiver = Auth::user()->email;
+        Mail::to($receiver)->send($mail);
 
 
         return redirect()->route('admin.posts.index');
@@ -82,7 +101,9 @@ class PostController extends Controller
     {
         $tags = Tag::all();
         $categories = Category::all();
-        return view('admin.posts.edit', compact('tags', 'post', 'categories'));
+        $post_tags_ids = $post->tags->pluck('id')->toArray();
+
+        return view('admin.posts.edit', compact('tags', 'post', 'categories', 'post_tags_ids'));
     }
 
     /**
@@ -94,9 +115,14 @@ class PostController extends Controller
      */
     public function update(Request $request, Post $post)
     {
+
         $data = $request->all();
         $post->fill($data);
         $post->save();
+        // VA MESSO DOPO L'UPDATE
+        if (!array_key_exists('tags', $data)) $post->tags()->detach();
+        else $post->tags()->sync($data['tags']);
+
         return redirect()->route('admin.posts.show', $post->id);
     }
 

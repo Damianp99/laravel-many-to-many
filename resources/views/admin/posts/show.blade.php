@@ -8,7 +8,7 @@
         style="background-color: {{ $tag->color }}">{{ $tag->label }}</p>
     @empty <p>Nessun tag</p>
     @endforelse
-    <img src="{{$post->image}}" alt="no-image">
+    <img src="{{asset("storage/$post->image")}}" alt="no-image">
     <div class="d-flex align-items-center justify-content-between py-2">
         <span>{{$post->created_at}}</span>
         <a href="{{route('admin.posts.index')}}" class="btn btn-sm btn-info"><i class="fa-solid fa-circle-chevron-left"></i></a>

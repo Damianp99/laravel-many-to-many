@@ -17,7 +17,7 @@
 </div>
 <div class="form-group col-12">
     <label for="image">Immagine</label>
-    <input type="url" class="form-control" id="image" name="image" placeholder="Immagine" value="{{$post->image}}">
+    <input type="file" class="form-control-file" id="image" name="image" placeholder="Immagine" value="{{$post->image}}">
 </div>
 <div class="form-group col-12">
     <label for="description">Descrizione </label>
@@ -30,7 +30,7 @@
         @foreach ($tags as $tag)
         <div class="form-check mx-3">
             <input class="form-check-input" type="checkbox" value="{{ $tag->id }}"
-             id="tag-{{ $tag->id }}" name="tags[]" @if (in_array($tag->id, old('tags', $post_tag_ids ?? []))) checked @endif>
+             id="tag-{{ $tag->id }}" name="tags[]" @if (in_array($tag->id, old('tags', $post_tags_ids ?? []))) checked @endif>
             <label class="form-check-label" for="tag-{{ $tag->id }}">{{ $tag->label }}</label>
         </div>
         @endforeach
